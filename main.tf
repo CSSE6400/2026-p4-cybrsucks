@@ -14,8 +14,51 @@ provider "aws" {
       tags = { 
          Environment = "Dev" 
          Course = "CSSE6400" 
-         StudentID = "<Your Student ID>" 
+         StudentID = "47305719" 
       } 
  } 
 }
+
+resource "aws_instance" "hextris-server" { 
+   ami = "ami-0cb5cf49019e79c51" 
+   instance_type = "t2.micro" 
+   key_name = "vockey" 
+   user_data = file("./serve-hextris.sh")
+   security_groups = [aws_security_group.hextris-server.name]
+   
+   tags = { 
+      Name = "hextris" 
+   } 
+}
+
+output "hextris-url" { 
+ value = aws_instance.hextris-server.public_ip 
+}
+
+resource "aws_security_group" "hextris-server" { 
+ name = "hextris-server" 
+ description = "Hextris HTTP and SSH access" 
+ 
+ ingress { 
+   from_port = 80 
+   to_port = 80 
+   protocol = "tcp" 
+   cidr_blocks = ["0.0.0.0/0"] 
+ } 
+ 
+ ingress { 
+   from_port = 22 
+   to_port = 22 
+   protocol = "tcp" 
+   cidr_blocks = ["0.0.0.0/0"] 
+ } 
+ 
+ egress { 
+   from_port = 0 
+   to_port = 0 
+   protocol = "-1" 
+   cidr_blocks = ["0.0.0.0/0"] 
+ } 
+}
+ 
        
